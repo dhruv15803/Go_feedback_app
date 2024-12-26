@@ -155,6 +155,7 @@ func (s *APIServer) loginUserHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
+
 	http.SetCookie(w, &cookie)
 
 	// Respond with a success message and user information
@@ -253,6 +254,31 @@ func (s *APIServer) AuthMiddleware(next http.Handler) http.Handler {
 		// Call the next handler with the updated context
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func (s *APIServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
+	_, ok := r.Context().Value(userIDKey).(int)
+	if !ok {
+		s.writeJSONError(w, "user not authorized", http.StatusUnauthorized)
+		return
+	}
+	// authenticated cookie name -> auth_token
+	cookie := http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, &cookie)
+	type Envelope struct {
+		Message string `json:"message"`
+	}
+	if err := s.writeJSON(w, Envelope{Message: "logged out successfully"}, http.StatusOK); err != nil {
+		s.writeJSONError(w, "something went wrong", http.StatusInternalServerError)
+	}
 }
 
 func (s *APIServer) validateEmail(email string) bool {
