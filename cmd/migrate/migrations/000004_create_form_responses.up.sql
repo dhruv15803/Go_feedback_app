@@ -1,0 +1,12 @@
+
+
+
+CREATE TABLE IF NOT EXISTS form_responses (
+    id BIGSERIAL PRIMARY KEY,
+    form_id BIGINT NOT NULL,
+    respondent_id BIGINT NOT NULL,
+    submitted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    FOREIGN KEY(form_id) REFERENCES forms(id) ON DELETE CASCADE,
+    FOREIGN KEY(respondent_id) REFERENCES users(id) ON DELETE CASCADE
+);
+

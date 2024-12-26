@@ -1,0 +1,12 @@
+
+
+
+CREATE TABLE IF NOT EXISTS forms(
+    id BIGSERIAL PRIMARY KEY,
+    form_title VARCHAR(455) NOT NULL,
+    form_description TEXT NOT NULL,
+    is_ready BOOLEAN NOT NULL DEFAULT FALSE,
+    user_id BIGINT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
