@@ -16,6 +16,28 @@ type FormFieldStore struct {
 	db *sql.DB
 }
 
+func (s *FormFieldStore) GetFormFieldsByFormId(formId int) ([]FormField, error) {
+	query := `SELECT id,field_title,required,form_id FROM form_fields WHERE form_id=$1`
+
+	rows, err := s.db.Query(query, formId)
+	if err != nil {
+		return []FormField{}, err
+	}
+	defer rows.Close()
+	var formFields []FormField
+
+	for rows.Next() {
+		var formField FormField
+		if err = rows.Scan(&formField.Id, &formField.FieldTitle, &formField.Required, &formField.FormId); err != nil {
+			return []FormField{}, err
+		}
+
+		formFields = append(formFields, formField)
+	}
+
+	return formFields, nil
+}
+
 func (s *FormFieldStore) CreateFormField(fieldTitle string, isRequired bool, formId int) (*FormField, error) {
 	tx, err := s.db.Begin()
 	if err != nil {

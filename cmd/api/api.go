@@ -50,6 +50,14 @@ func (s *APIServer) Run() error {
 				r.Put("/{fieldId}", s.updateFormField)
 			})
 		})
+
+		r.Route("/form-responses", func(r chi.Router) {
+			r.Use(s.AuthMiddleware)
+			r.Post("/", s.createFormResponse)
+			r.Get("/{formId}", s.getFormResponses)
+			r.Get("/response-fields/{formResponseId}", s.getResponseFields)
+		})
+
 	})
 
 	server := http.Server{

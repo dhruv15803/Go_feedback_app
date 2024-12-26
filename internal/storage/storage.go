@@ -23,13 +23,25 @@ type Storage struct {
 		UpdateFormIsReady(formId int) error
 		GetFormFieldById(fieldId int) (*FormField, error)
 		UpdateFormField(fieldId int, fieldTitle string, isRequired bool) (*FormField, error)
+		GetFormFieldsByFormId(formId int) ([]FormField, error)
+	}
+	FormResponse interface {
+		CreateFormResponse(formId int, userId int) (*FormResponse, error)
+		CreateResponseFields(formResponseId int, responseFields []struct {
+			FieldValue  string
+			FormFieldId int
+		}) ([]ResponseField, error)
+		GetFormResponsesByFormId(formId int) ([]FormResponse, error)
+		GetFormResponseById(FormResponseId int) (*FormResponse, error)
+		GetResponseFieldsByFormResponseId(formResponseId int) ([]ResponseField, error)
 	}
 }
 
 func NewStorage(db *sql.DB) *Storage {
 	return &Storage{
-		Users:      &UserStore{db: db},
-		Forms:      &FormStore{db: db},
-		FormFields: &FormFieldStore{db: db},
+		Users:        &UserStore{db: db},
+		Forms:        &FormStore{db: db},
+		FormFields:   &FormFieldStore{db: db},
+		FormResponse: &FormResponseStore{db: db},
 	}
 }
