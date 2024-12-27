@@ -168,7 +168,7 @@ func (s *APIServer) getResponseFields(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// can only read  form responses if the form belongs to u
+	// can only read  form responses if the form belongs to u or if you were the respondent
 	// so can only read form response fields for the same
 	formResponse, err := s.storage.FormResponse.GetFormResponseById(int(formResponseId))
 	if err != nil {
@@ -182,12 +182,10 @@ func (s *APIServer) getResponseFields(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if form.UserId != userId {
+	if form.UserId != userId && formResponse.RespondentId != userId {
 		s.writeJSONError(w, "user not authorized to read form responses", http.StatusUnauthorized)
 		return
 	}
-
-	// form is user's so responses to the form can be read
 
 	responseFields, err := s.storage.FormResponse.GetResponseFieldsByFormResponseId(formResponse.Id)
 	if err != nil {
