@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dhruv15803/internal/storage"
@@ -25,7 +26,7 @@ func (s *APIServer) Run() error {
 	router := chi.NewRouter()
 
 	corsOptions := cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"}, // Add your frontend URLs here
+		AllowedOrigins:   []string{os.Getenv("CLIENT_URL")}, // Add your frontend URLs here
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
