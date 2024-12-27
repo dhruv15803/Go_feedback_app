@@ -93,7 +93,7 @@ func (s *APIServer) registerUserHandler(w http.ResponseWriter, r *http.Request) 
 		Path:     "/",
 		Expires:  time.Now().Add(time.Hour * 48),
 		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteNoneMode,
 		Secure:   true,
 	}
 	http.SetCookie(w, &cookie)
@@ -154,7 +154,7 @@ func (s *APIServer) loginUserHandler(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		Expires:  time.Now().Add(time.Hour * 48),
 		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteNoneMode,
 		Secure:   true,
 	}
 
@@ -273,7 +273,7 @@ func (s *APIServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteNoneMode,
 	}
 	http.SetCookie(w, &cookie)
 	type Envelope struct {
