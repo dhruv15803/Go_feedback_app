@@ -6,14 +6,10 @@ import (
 	"os"
 
 	"github.com/dhruv15803/internal/storage"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("ENV VARIABLE FAILED TO LOAD")
-	}
 	db_conn := os.Getenv("DB_CONN")
 	port := os.Getenv("PORT")
 	db, err := sql.Open("postgres", db_conn)
