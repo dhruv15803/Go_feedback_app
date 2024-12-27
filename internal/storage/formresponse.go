@@ -7,7 +7,8 @@ type FormResponse struct {
 	FormId       int    `json:"form_id"`
 	RespondentId int    `json:"respondent_id"`
 	SubmittedAt  string `json:"submitted_at"`
-	Respondent   User   `json:"respondent"`
+	Respondent   *User  `json:"respondent"`
+	Form         *Form  `json:"form"`
 }
 
 type ResponseField struct {
@@ -27,15 +28,12 @@ func (s *FormResponseStore) GetFormResponsesByRespondentId(respondentId int) ([]
 	var formResponses []FormResponse
 
 	query := `
-	SELECT 
-		fr.id,fr.form_id,fr.respondent_id,fr.submitted_at,
-		u.id,u.email,u.username,u.password,u.created_at,u.updated_at
-	FROM 
-		form_responses AS fr INNER JOIN users AS u 
-	ON 
-		fr.respondent_id=u.id
-	WHERE 
-		fr.respondent_id=$1;`
+SELECT fr.id,fr.form_id,fr.respondent_id,fr.submitted_at,
+f.id,f.form_title,f.form_description,f.is_ready,f.user_id,f.created_at,u.id,
+u.email,u.username,u.password,u.created_at,u.updated_at 
+FROM form_responses AS fr INNER JOIN forms AS f ON fr.form_id=f.id INNER JOIN 
+users AS u ON fr.respondent_id=u.id
+WHERE fr.respondent_id=$1`
 
 	rows, err := s.db.Query(query, respondentId)
 	if err != nil {
@@ -45,11 +43,17 @@ func (s *FormResponseStore) GetFormResponsesByRespondentId(respondentId int) ([]
 	for rows.Next() {
 		var formResponse FormResponse
 		var respondent User
-		if err := rows.Scan(&formResponse.Id, &formResponse.FormId, &formResponse.RespondentId, &formResponse.SubmittedAt,
-			&respondent.Id, &respondent.Email, &respondent.Username, &respondent.Password, &respondent.CreatedAt, &respondent.UpdatedAt); err != nil {
+		var form Form
+		if err := rows.Scan(&formResponse.Id, &formResponse.FormId,
+			&formResponse.RespondentId, &formResponse.SubmittedAt,
+			&form.Id, &form.FormTitle, &form.FormDescription, &form.IsReady, &form.UserId,
+			&form.CreatedAt, &respondent.Id, &respondent.Email,
+			&respondent.Username, &respondent.Password, &respondent.CreatedAt,
+			&respondent.UpdatedAt); err != nil {
 			return []FormResponse{}, err
 		}
-		formResponse.Respondent = respondent
+		formResponse.Respondent = &respondent
+		formResponse.Form = &form
 		formResponses = append(formResponses, formResponse)
 	}
 
@@ -116,12 +120,12 @@ func (s *FormResponseStore) GetFormResponsesByFormId(formId int) ([]FormResponse
 	var formResponses []FormResponse
 
 	query :=
-		`SELECT 
-		fr.id,fr.form_id,fr.respondent_id,fr.submitted_at,
-		u.id,u.email,u.username,u.password,u.created_at,u.updated_at  
-	FROM 
-		form_responses AS fr INNER JOIN users AS u ON fr.respondent_id=u.id
-	WHERE fr.form_id=$1`
+		`SELECT fr.id,fr.form_id,fr.respondent_id,fr.submitted_at,
+f.id,f.form_title,f.form_description,f.is_ready,f.user_id,f.created_at,u.id,
+u.email,u.username,u.password,u.created_at,u.updated_at 
+FROM form_responses AS fr INNER JOIN forms AS f ON fr.form_id=f.id INNER JOIN 
+users AS u ON fr.respondent_id=u.id
+WHERE fr.form_id=$1`
 
 	rows, err := s.db.Query(query, formId)
 
@@ -134,13 +138,19 @@ func (s *FormResponseStore) GetFormResponsesByFormId(formId int) ([]FormResponse
 	for rows.Next() {
 		var formResponse FormResponse
 		var respondent User
+		var form Form
 
-		if err = rows.Scan(&formResponse.Id, &formResponse.FormId, &formResponse.RespondentId, &formResponse.SubmittedAt,
-			&respondent.Id, &respondent.Email, &respondent.Username, &respondent.Password, &respondent.CreatedAt, &respondent.UpdatedAt); err != nil {
+		if err = rows.Scan(&formResponse.Id, &formResponse.FormId,
+			&formResponse.RespondentId, &formResponse.SubmittedAt,
+			&form.Id, &form.FormTitle, &form.FormDescription, &form.IsReady, &form.UserId,
+			&form.CreatedAt, &respondent.Id, &respondent.Email,
+			&respondent.Username, &respondent.Password, &respondent.CreatedAt,
+			&respondent.UpdatedAt); err != nil {
 			return []FormResponse{}, err
 		}
 
-		formResponse.Respondent = respondent
+		formResponse.Respondent = &respondent
+		formResponse.Form = &form
 		formResponses = append(formResponses, formResponse)
 	}
 

@@ -26,6 +26,24 @@ type UpdateFormFieldRequest struct {
 	Required   bool   `json:"required"`
 }
 
+func (s *APIServer) getAllForms(w http.ResponseWriter, r *http.Request) {
+	_, ok := r.Context().Value(userIDKey).(int)
+	if !ok {
+		s.writeJSONError(w, "unauthorized: unable to retrieve user from context", http.StatusUnauthorized)
+		return
+	}
+
+	forms, err := s.storage.Forms.GetAllForms()
+	if err != nil {
+		s.writeJSONError(w, fmt.Sprintf("internal server error: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	if err = s.writeJSON(w, forms, http.StatusOK); err != nil {
+		s.writeJSONError(w, fmt.Sprintf("internal server error: %v", err), http.StatusInternalServerError)
+	}
+}
+
 func (s *APIServer) createForm(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the authenticated user's userId from the request context
 	userId, ok := r.Context().Value(userIDKey).(int)

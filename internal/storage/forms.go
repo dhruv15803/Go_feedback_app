@@ -55,6 +55,40 @@ func (fs *FormStore) CreateForm(formTitle string, formDescription string, userId
 	return &form, nil
 }
 
+func (fs *FormStore) GetAllForms() ([]Form, error) {
+	query := `		SELECT 
+			f.id, f.form_title, f.form_description, f.is_ready, f.user_id, f.created_at,
+			u.id, u.email, u.username, u.password, u.created_at, u.updated_at
+		FROM forms AS f 
+		INNER JOIN users AS u ON f.user_id = u.id`
+
+	rows, err := fs.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var forms []Form
+
+	for rows.Next() {
+		var form Form
+		var user User
+
+		// Scan both form and user details into their respective structs
+		if err := rows.Scan(
+			&form.Id, &form.FormTitle, &form.FormDescription, &form.IsReady, &form.UserId, &form.CreatedAt,
+			&user.Id, &user.Email, &user.Username, &user.Password, &user.CreatedAt, &user.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		form.User = &user // Link the user to the form
+		forms = append(forms, form)
+	}
+
+	return forms, nil
+}
+
 func (fs *FormStore) GetFormsByUserId(userId int) ([]Form, error) {
 	query := `
 		SELECT 

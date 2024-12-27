@@ -53,6 +53,7 @@ func (s *APIServer) Run() error {
 		r.Route("/form", func(r chi.Router) {
 			r.Use(s.AuthMiddleware)
 			r.Post("/", s.createForm)
+			r.Get("/", s.getAllForms)
 			r.Get("/my-forms", s.myForms)
 			r.Get("/{formId}", s.getFormWithFields)
 			r.Delete("/{formId}", s.deleteFormHandler)

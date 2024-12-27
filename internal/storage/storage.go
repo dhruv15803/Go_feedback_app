@@ -13,6 +13,7 @@ type Storage struct {
 	Forms interface {
 		CreateForm(formTitle string, formDescription string, userId int) (*Form, error)
 		GetFormsByUserId(userId int) ([]Form, error)
+		GetAllForms() ([]Form, error)
 		GetFormById(formId int) (*Form, error)
 		GetFormByIdWithFieldsAndUser(formId int) (*Form, error)
 		DeleteFormById(formId int) error
