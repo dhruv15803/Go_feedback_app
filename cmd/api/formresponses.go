@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -196,5 +197,24 @@ func (s *APIServer) getResponseFields(w http.ResponseWriter, r *http.Request) {
 
 	if err := s.writeJSON(w, responseFields, http.StatusOK); err != nil {
 		s.writeJSONError(w, "failed to write response", http.StatusInternalServerError)
+	}
+}
+
+func (s *APIServer) getMyResponses(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value(userIDKey).(int)
+	if !ok {
+		s.writeJSONError(w, "invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	formResponses, err := s.storage.FormResponse.GetFormResponsesByRespondentId(userId)
+	if err != nil {
+		log.Println(err.Error())
+		s.writeJSONError(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	if err = s.writeJSON(w, formResponses, http.StatusOK); err != nil {
+		s.writeJSONError(w, "something went wrong", http.StatusInternalServerError)
 	}
 }

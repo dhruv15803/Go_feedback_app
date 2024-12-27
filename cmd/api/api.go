@@ -68,6 +68,7 @@ func (s *APIServer) Run() error {
 			r.Use(s.AuthMiddleware)
 			r.Post("/", s.createFormResponse)
 			r.Get("/{formId}", s.getFormResponses)
+			r.Get("/", s.getMyResponses) // get authenticated user's responses to form's he/she has responded to
 			r.Get("/response-fields/{formResponseId}", s.getResponseFields)
 		})
 

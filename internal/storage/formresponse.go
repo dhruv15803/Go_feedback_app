@@ -22,6 +22,41 @@ type FormResponseStore struct {
 	db *sql.DB
 }
 
+func (s *FormResponseStore) GetFormResponsesByRespondentId(respondentId int) ([]FormResponse, error) {
+
+	var formResponses []FormResponse
+
+	query := `
+	SELECT 
+		fr.id,fr.form_id,fr.respondent_id,fr.submitted_at,
+		u.id,u.email,u.username,u.password,u.created_at,u.updated_at
+	FROM 
+		form_responses AS fr INNER JOIN users AS u 
+	ON 
+		fr.respondent_id=u.id
+	WHERE 
+		fr.respondent_id=$1;`
+
+	rows, err := s.db.Query(query, respondentId)
+	if err != nil {
+		return []FormResponse{}, err
+	}
+
+	for rows.Next() {
+		var formResponse FormResponse
+		var respondent User
+		if err := rows.Scan(&formResponse.Id, &formResponse.FormId, &formResponse.RespondentId, &formResponse.SubmittedAt,
+			&respondent.Id, &respondent.Email, &respondent.Username, &respondent.Password, &respondent.CreatedAt, &respondent.UpdatedAt); err != nil {
+			return []FormResponse{}, err
+		}
+		formResponse.Respondent = respondent
+		formResponses = append(formResponses, formResponse)
+	}
+
+	return formResponses, nil
+
+}
+
 func (s *FormResponseStore) CreateFormResponse(formId int, userId int) (*FormResponse, error) {
 
 	var formResponse FormResponse

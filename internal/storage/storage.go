@@ -34,6 +34,7 @@ type Storage struct {
 		GetFormResponsesByFormId(formId int) ([]FormResponse, error)
 		GetFormResponseById(FormResponseId int) (*FormResponse, error)
 		GetResponseFieldsByFormResponseId(formResponseId int) ([]ResponseField, error)
+		GetFormResponsesByRespondentId(respondentId int) ([]FormResponse, error)
 	}
 }
 
